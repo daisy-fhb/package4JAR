@@ -1,7 +1,6 @@
 package com.example.demo;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -36,7 +35,7 @@ public class COAPClientTest {
     public void CreateFrame() {
 
         ClientFrame = new JFrame("赛佰特COAP客户端");
-        ClientFrame.setSize(800,600);
+        ClientFrame.setSize(900,600);
         ClientFrame.setLocationRelativeTo(null);
         ClientFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -73,12 +72,12 @@ public class COAPClientTest {
         ClientIdPanel.setBorder(new TitledBorder("信息栏"));
 
         JPanel explainPanel = new JPanel();
-        explainPanel.setPreferredSize(new Dimension(200,400));
+        explainPanel.setPreferredSize(new Dimension(300,400));
         explainPanel.setBorder(new TitledBorder("说明"));
         explainLabel = new JLabel("<html>");
-        explainLabel.setPreferredSize(new Dimension(200,400));
+        explainLabel.setPreferredSize(new Dimension(300,400));
         explainPanel.add(explainLabel);
-        explainLabel.setText("<html><span color='blue'>1: 设备ID应与鉴权PID相同;<br><br>2: 发送消息封装的消息格式为：TOPIC@设备ID@消息内容<br>如TOPIC@DEVICEID@123<br><br>3: 客户端接收来自服务端的COAP消息默认端口为1000，即接收地址为coap://ip:1000/设备id <br><br>4: COAP ping仅用于测试客户端与服务端的信息发送端口是否正常连接<span></html>");
+        explainLabel.setText("<html><span color='blue'>1: 设备ID应与鉴权PID相同;<br><br>2: 发送消息封装的消息格式为:<br>TOPIC@设备ID@消息内容@鉴权密钥<br>鉴权密钥格式为:*PID#Uid#AuthCode*<br>如TOPIC@DEVICEID@123@*PID#Uid#AuthCode*<br><br>3: 客户端接收来自服务端的COAP消息默认端口为1000，即接收地址为coap://ip:1000/设备id <br><br>4: COAP ping仅用于测试客户端与服务端的信息发送端口是否正常连接<span></html>");
 
         JPanel ChatContentPanel = new JPanel();
         ChatContentPanel.setPreferredSize(new Dimension(490,400));
@@ -164,6 +163,7 @@ public class COAPClientTest {
             URI uri = new URI("coap://"+ip+":"+port+"/"+deviceid);
             CoapClient client = new CoapClient(uri);
             CoapResponse response = client.post(message,0);
+            response.getOptions().setContentFormat(50);
             if (response != null) {
                 if ("NOT_FOUND".equals(response.getCode().name())){
                     Error("找不到该设备的COAP服务,请确认设备ID是否正确！");
