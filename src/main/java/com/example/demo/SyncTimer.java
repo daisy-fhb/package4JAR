@@ -1,7 +1,10 @@
 package com.example.demo;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.dialect.Props;
+import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.swing.*;
@@ -12,6 +15,8 @@ import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 
 public class SyncTimer {
 
@@ -29,7 +34,7 @@ public class SyncTimer {
 
     public void CreateFrame() {
 
-        ClientFrame = new JFrame("中央监控系统时钟同步客户端软件");
+        ClientFrame = new JFrame("时钟同步软件");
         ClientFrame.setSize(800,600);
         ClientFrame.setLocationRelativeTo(null);
         ClientFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,6 +92,7 @@ public class SyncTimer {
                 String ip=ServerIPAddressText.getText().trim();
                 String port=ServerPortText.getText().trim();
                 JSONObject re=startSyncClock(ip,port);
+//                JSONObject re=startSyncClock2();
                 if (re.getBoolean("flag")){
                     Message(re.toJSONString());
                 }else{
@@ -120,9 +126,8 @@ public class SyncTimer {
     public JSONObject updateSysDateTime(String dataStr_, String timeStr_){
         JSONObject re=new JSONObject();
         try {
-            String osName = System.getProperty("os.name");
             // Window 系统
-            if (osName.matches("^(?i)Windows.*$")) {
+            if (SystemUtil.getOsInfo().isWindows()) {
                 String cmd;
                 // 格式：yyyy-MM-dd
                 cmd = " cmd /c date " + dataStr_;
@@ -132,7 +137,7 @@ public class SyncTimer {
                 Runtime.getRuntime().exec(cmd);
                 re.put("msg","windows 时间同步成功");
                 re.put("flag",true);
-            } else if (osName.matches("^(?i)Linux.*$")||osName.contains("Mac OS")) {
+            } else if (SystemUtil.getOsInfo().isLinux()||SystemUtil.getOsInfo().isMacOsX()) {
                 // Linux 系统 格式：yyyy-MM-dd HH:mm:ss   date -s "2017-11-11 11:11:11"
                 FileWriter excutefw = new FileWriter("/usr/updateSysTime.sh");
                 BufferedWriter excutebw=new BufferedWriter(excutefw);
@@ -155,13 +160,26 @@ public class SyncTimer {
     }
 
 
-    /**
-     * 定时任务方法
-     */
     public JSONObject startSyncClock(String ip,String port){
         JSONObject re=new JSONObject();
         try {
             String serverTime= HttpUtil.get(ip+":"+port+"/windMachine/clocksync",3000);
+            re=updateSysDateTime(serverTime.split(" ")[0],serverTime.split(" ")[1]);
+            re.put("time",serverTime);
+        }catch (Exception e){
+            re.put("error","连接超时，请检查ip/地址是否正确");
+            re.put("flag",false);
+        }
+        return re;
+    }
+
+    public JSONObject startSyncClock2(){
+        JSONObject re=new JSONObject();
+        try {
+            String serverTime= HttpUtil.get("http://api.m.taobao.com/rest/api3.do?api=mtop.common.getTimestamp",3000);
+            cn.hutool.json.JSONObject dateslong= JSONUtil.parseObj(serverTime).getJSONObject("data");
+            long date=dateslong.getLong("t");
+            serverTime= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
             re=updateSysDateTime(serverTime.split(" ")[0],serverTime.split(" ")[1]);
             re.put("time",serverTime);
         }catch (Exception e){

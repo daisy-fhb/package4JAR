@@ -71,7 +71,7 @@
                             <addClasspath>true</addClasspath>
                             <useUniqueVersions>false</useUniqueVersions>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.example.demo.COAPClientTest</mainClass>
+                            <mainClass>com.example.demo.LinuxSysUtil</mainClass>
                         </manifest>
                         <manifestEntries>
                             <version>${project.version}</version>

@@ -177,6 +177,7 @@ public class COAPClientTest {
     }
 
     public  void GetInfo(){
+        String lastTime="";
         while (true){
             String ip=ServerIPAddressText.getText().trim();
             String deviceid=deviceIdText.getText().trim();
@@ -185,9 +186,13 @@ public class COAPClientTest {
                 CoapClient client = new CoapClient(uri);
                 CoapResponse response = client.get();
                 if (response != null) {
-                    if (!response.getResponseText().equals(cur_info)){
-                        cur_info=response.getResponseText();
-                        Message("接收到服务器发来的消息:"+cur_info);
+                    if (!"".equals(response.getResponseText())){
+                        if (!lastTime.equals(response.getResponseText().split("#")[1])){
+                            cur_info=response.getResponseText().split("#")[0];
+                            Message("接收到服务器发来的消息:"+cur_info);
+                            lastTime=response.getResponseText().split("#")[1];
+                        }
+
                     }
                 }
                 Thread.sleep(1000);
