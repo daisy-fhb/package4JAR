@@ -84,6 +84,6 @@ public class LinuxSysUtil {
         return result;
     }
     public static void main(String[] args) {
-        ShowInfo();
+//        ShowInfo();
     }
 }
